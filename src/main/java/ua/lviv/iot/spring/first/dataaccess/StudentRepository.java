@@ -1,4 +1,4 @@
-package ua.lviv.first.dataaccess;
+package ua.lviv.iot.spring.first.dataaccess;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,9 +1,6 @@
 package ua.lviv.iot.spring.first.rest.controller;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -24,9 +21,6 @@ import ua.lviv.iot.spring.first.rest.model.Student;
 @RequestMapping("/students")
 @RestController
 public class StudentsController {
-    private Map<Integer, Student> students = new HashMap<>();
-
-    private AtomicInteger idCounter = new AtomicInteger();
 
     @Autowired
     private StudentService studentService;
@@ -41,34 +35,33 @@ public class StudentsController {
 
     @GetMapping(path = "/{id}")
     public Student getStudent(final @PathVariable("id") Integer studentId) {
-        System.out.println(studentId);
-        return students.get(studentId);
+        return studentService.findeOne(studentId);
     }
 
-    @PostMapping(produces = { MediaType.APPLICATION_JSON_VALUE, MediaType.APPLICATION_XML_VALUE })
+    @PostMapping(produces = { MediaType.APPLICATION_JSON_VALUE })
     public Student createStudent(final @RequestBody Student student) {
-        System.out.println(studentService.createStudent(student));
-        student.setId(idCounter.incrementAndGet());
-        students.put(student.getId(), student);
-        return student;
+        return studentService.createStudent(student);
     }
 
     @DeleteMapping(path = "/{id}")
     public ResponseEntity<Student> deleteStudent(@PathVariable("id") Integer studentId) {
-        HttpStatus status = students.remove(studentId) == null ? HttpStatus.NOT_FOUND : HttpStatus.OK;
-        return ResponseEntity.status(status).build();
+        if (studentService.studentExists(studentId)) {
+            studentService.deleteStudent(studentId);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
     }
 
     @PutMapping(path = "/{id}")
     public ResponseEntity<Student> updateStudent(final @PathVariable("id") Integer studentId,
             final @RequestBody Student student) {
 
-        if (students.containsKey(studentId)) {
-            student.setId(studentId);
-            students.put(studentId, student);
-            return ResponseEntity.status(HttpStatus.OK).build();
+        Student previousStudent = studentService.findeOne(studentId);
+        if (previousStudent != null) {
+            studentService.updateStudent(studentId, student);
+            return ResponseEntity.ok(previousStudent);
         }
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        return ResponseEntity.notFound().build();
 
     }
 }

@@ -1,6 +1,8 @@
 package ua.lviv.iot.spring.first.business;
 
 import java.util.List;
+import java.util.NoSuchElementException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ua.lviv.iot.spring.first.dataaccess.StudentRepository;
@@ -20,7 +22,28 @@ public class StudentService {
         return studentRepository.findAll();
     }
 
+    public Student findeOne(Integer id) {
+        try {
+            return studentRepository.findById(id).get();
+        } catch (NoSuchElementException e) {
+            return null;
+        }
+    }
+
+    public Student updateStudent(Integer studentId, Student student) {
+        student.setId(studentId);
+        return studentRepository.save(student);
+    }
+
+    public void deleteStudent(Integer studentId) {
+        studentRepository.deleteById(studentId);
+    }
+
     public List<Student> getAllByFirstName(String firstName) {
         return studentRepository.findAllByFirstName(firstName);
+    }
+
+    public boolean studentExists(Integer studentId) {
+        return studentRepository.existsById(studentId);
     }
 }

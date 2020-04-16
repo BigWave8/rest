@@ -2,13 +2,13 @@ package ua.lviv.iot.spring.first.rest.model;
 
 import java.util.Set;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedNativeQuery;
@@ -24,13 +24,16 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = { CascadeType.ALL })
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "group_id")
     @JsonIgnoreProperties("students")
     private Group group;
 
     @JsonIgnoreProperties("students")
-    @ManyToMany(mappedBy = "students")
+    @JoinTable(name = "Student_Subject", joinColumns = {
+            @JoinColumn(name = "student_id", nullable = false) }, inverseJoinColumns = {
+                    @JoinColumn(name = "subject_id", nullable = true) })
+    @ManyToMany(fetch = FetchType.EAGER)
     private Set<Subject> subjects;
 
     private String firstName;
